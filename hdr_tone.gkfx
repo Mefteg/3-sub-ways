@@ -1,0 +1,44 @@
+
+ -- hdr_tone_vertex
+    #version 120
+
+    void main(void)
+    {
+        gl_TexCoord[0]= gl_MultiTexCoord0;
+        gl_Position= ftransform();
+    }
+
+ -- hdr_tone_fragment
+    #version 120
+
+    uniform float compression;
+    uniform float saturation;
+    uniform float heat;
+
+    uniform sampler2D image;
+    uniform sampler2D colors;
+
+    void main(void)
+    {
+        const vec3 rgby= vec3(0.3, 0.59, 0.11);
+        float k1= 1.0 / pow(saturation, 1.0 / compression); // normalisation : saturation == blanc
+        
+        vec3 color= texture2D(image, gl_TexCoord[0].st).rgb;
+        float y= dot(color, rgby);  // normalisation de la couleur : (color / y) == teinte
+        
+        if(y > saturation)
+            color= vec3(y, y, y);
+        
+        if(heat > 0.0)
+            // applique une fausse couleur
+            color= texture2D(colors, vec2(y / saturation, 0.5)).rgb;
+        else
+            // applique la compression (gamma)
+            color= (color / y) * k1 * pow(y, 1.0 / compression);
+        
+        gl_FragColor= vec4(color, 1.);
+    }
+
+ -- hdr
+    vertex= hdr_tone_vertex
+    fragment= hdr_tone_fragment
