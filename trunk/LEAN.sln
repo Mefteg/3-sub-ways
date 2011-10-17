@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gKitStatic", "gKitStatic.vcproj", "{52B8212F-2B7B-8848-9050-61215B6049B0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gKitShared", "gKitShared.vcproj", "{4D268277-05C9-744C-B146-668D6085A5AF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "image_viewer", "image_viewer.vcproj", "{C2547DBE-59AA-5141-89BA-D5AAEB96FBFE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		debug|Win32 = debug|Win32
+		release|Win32 = release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52B8212F-2B7B-8848-9050-61215B6049B0}.debug|Win32.ActiveCfg = debug|Win32
+		{52B8212F-2B7B-8848-9050-61215B6049B0}.debug|Win32.Build.0 = debug|Win32
+		{52B8212F-2B7B-8848-9050-61215B6049B0}.release|Win32.ActiveCfg = release|Win32
+		{52B8212F-2B7B-8848-9050-61215B6049B0}.release|Win32.Build.0 = release|Win32
+		{4D268277-05C9-744C-B146-668D6085A5AF}.debug|Win32.ActiveCfg = debug|Win32
+		{4D268277-05C9-744C-B146-668D6085A5AF}.debug|Win32.Build.0 = debug|Win32
+		{4D268277-05C9-744C-B146-668D6085A5AF}.release|Win32.ActiveCfg = release|Win32
+		{4D268277-05C9-744C-B146-668D6085A5AF}.release|Win32.Build.0 = release|Win32
+		{C2547DBE-59AA-5141-89BA-D5AAEB96FBFE}.debug|Win32.ActiveCfg = debug|Win32
+		{C2547DBE-59AA-5141-89BA-D5AAEB96FBFE}.debug|Win32.Build.0 = debug|Win32
+		{C2547DBE-59AA-5141-89BA-D5AAEB96FBFE}.release|Win32.ActiveCfg = release|Win32
+		{C2547DBE-59AA-5141-89BA-D5AAEB96FBFE}.release|Win32.Build.0 = release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
