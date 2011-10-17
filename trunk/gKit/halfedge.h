@@ -39,6 +39,7 @@ class Halfedge {
         //retourne les deux vertex qui composent l'arete
         //dans ce sens : a -> b
         void getVertex(Vertex ** a, Vertex ** b);
+        Vertex * getOrigin();
         //retourne l'arete precedente
         Halfedge * getPrevious();
 

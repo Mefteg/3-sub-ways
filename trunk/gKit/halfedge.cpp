@@ -26,6 +26,10 @@ void Halfedge::getVertex(Vertex ** a, Vertex ** b) {
     *b = this->v;
 }
 
+Vertex * Halfedge::getOrigin() {
+    return this->getPrevious()->v;
+}
+
 Halfedge * Halfedge::getPrevious() {
     Halfedge * h = this->he_n, * ho;
     while ( h != this ) {
