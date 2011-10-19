@@ -27,9 +27,13 @@ class Vertex {
         gk::Point v; //position
         Halfedge * he;
         gk::Vector n; //normal
-        int ind;
+        int ind; //indique la place du vertex dans un fichier obj ( lors de l'export )
+        int id; //indique le numéro du vertex
+
         Vertex();
         Vertex(gk::Point, Halfedge * h=NULL, int i=0);
+
+        static int ID;
 
         //return true if the vertex belongs to the face, false else
         bool belongsToFace(Face *);

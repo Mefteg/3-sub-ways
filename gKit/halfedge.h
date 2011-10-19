@@ -51,6 +51,7 @@ class Halfedge {
         //retourne la nouvelle demi-arete créée devant celle-ci ( genere donc une arete et un sommet )
         // ! la nouvelle arete ne possede pas d'arete paire !
         Halfedge * subdivise();
+        void print();
 
         static void maillageToHalfedge(Vertex **, int, vector<Halfedge *> *, vector<Face *> *);
         static void computeNormals(Vertex **, int, vector<Face *> *);
