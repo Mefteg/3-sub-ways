@@ -33,6 +33,8 @@ class Face {
         //ecrit la face au format obj
         string toObj();
 
+        void print();
+
         static void fromObj(string, vector<Vertex *> *,
                             vector<Halfedge *> *,
                             vector<Face *> *);

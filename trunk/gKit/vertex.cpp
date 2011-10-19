@@ -1,7 +1,11 @@
 #include "vertex.h"
 #include "halfedge.h"
 
+int Vertex::ID=0;
+
 Vertex::Vertex() {
+    this->id = Vertex::ID;
+    Vertex::ID++;
 }
 
 Vertex::Vertex(gk::Point v, Halfedge * h, int i) {
@@ -9,6 +13,8 @@ Vertex::Vertex(gk::Point v, Halfedge * h, int i) {
     this->he=h;
     this->ind=i;
     this->n=gk::Vector(0,0,0);
+    this->id = Vertex::ID;
+    Vertex::ID++;
 }
 
 bool Vertex::belongsToFace( Face * f ) {

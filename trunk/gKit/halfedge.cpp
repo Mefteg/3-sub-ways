@@ -27,7 +27,8 @@ void Halfedge::getVertex(Vertex ** a, Vertex ** b) {
 }
 
 Vertex * Halfedge::getOrigin() {
-    return this->getPrevious()->v;
+    Halfedge * h = this->getPrevious();
+    return h->v;
 }
 
 Halfedge * Halfedge::getPrevious() {
@@ -115,7 +116,6 @@ void Halfedge::computeNormals(Vertex ** t_Maillage, int nb_pas, vector<Face *> *
     //pour chaque face
     for ( int i=0; i<v_Face->size(); i++ ) {
         gk::Vector norm = v_Face->at(i)->computeNormal();
-        //norm.print();
         vector<Vertex *> v_V = v_Face->at(i)->getVertex();
         //pour chaque vertex de cette face
         for ( int j=0; j<v_V.size(); j++ ) {
@@ -144,16 +144,6 @@ string Halfedge::faceToObj( Face * f ) {
     oss << he3->v->ind << "//" << he3->v->ind << endl;
 
     return oss.str();
-}
-
-int stringToInt( string s ) {
-    // créer un flux à partir de la chaîne à convertir
-    std::istringstream iss( s );
-    // convertir en un int
-    int nombre;
-    iss >> nombre; // nombre vaut 10
-
-    return nombre;
 }
 
 void evenHalfedge( Vertex * a, Vertex * b, Halfedge * he1, Halfedge * he2 ) {
@@ -205,12 +195,8 @@ void Halfedge::inverseFace() {
 }
 
 Halfedge * Halfedge::subdivise() {
-    Vertex * a, * b;
-    this->getVertex( &a, &b );
-    //Halfedge * hp = this->getPrevious();
-    //a = hp->v;
-    //b = this->v;
-    gk::Point p = (a->v + b->v)*0.5;
+    Vertex * o = this->getOrigin();
+    gk::Point p = (o->v + this->v->v)*0.5;
     Vertex * v = new Vertex( p, this );
     Halfedge * h2 = new Halfedge( this->v, this->he_n, NULL, this->f );
     h2->v->he = h2;
@@ -218,6 +204,14 @@ Halfedge * Halfedge::subdivise() {
     this->he_n = h2;
 
     return h2;
+}
+
+void Halfedge::print() {
+    cout << this->id << "->v" << this->id;
+    if ( this->he_e != NULL ) {
+        cout << " <-> " << this->he_e->id << "->v" << this->id;
+    }
+    cout << endl;
 }
 
 void Halfedge::importFromObj(string filename, vector<Vertex *> * v_Vertex, vector<Halfedge * > * v_Halfedge, vector<Face *> * v_Face ) {

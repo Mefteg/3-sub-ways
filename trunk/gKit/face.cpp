@@ -64,6 +64,16 @@ string Face::toObj() {
     return oss.str();
 }
 
+void Face::print() {
+    vector<Halfedge *> v_H = this->getHalfedges();
+
+    for ( int i=0; i<v_H.size(); i++ ) {
+        Halfedge * h = v_H.at(i);
+        cout << h->id << " -> ";
+    }
+    cout << endl;
+}
+
 void Face::fromObj( string filename, vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<Face *> * v_Face ) {
     ifstream file(filename.c_str());
 

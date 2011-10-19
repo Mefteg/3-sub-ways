@@ -447,6 +447,11 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
                 //on subdivise les deux
                 Halfedge * h2 = h->subdivise();
                 Halfedge * h_e2 = h_e->subdivise();
+                //parité
+                h->he_e = h_e2;
+                h_e2->he_e = h;
+                h2->he_e = h_e;
+                h_e->he_e = h2;
                 v_Halfedge->push_back(h2);
                 v_Halfedge->push_back(h_e2);
                 //et on supprime l'un des sommets
@@ -464,12 +469,15 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
     old_size = v_Face->size();
     //pour chaque face
     for ( int i=0; i<old_size; i++ ) {
+        cout << "Face " << i << endl;
         //je la divise
         Face * f = v_Face->at(i);
+        f->print();
         //pour chaque ancienne arete de la face
         Halfedge * h1 = f->he;
         Halfedge * h2 = h1->he_n->he_n;
         Halfedge * h3 = h2->he_n->he_n;
+        //les nouvelles aretes
         Halfedge * ha = h1->he_n;
         Halfedge * hb = h2->he_n;
         Halfedge * hc = h3->he_n;
@@ -578,11 +586,7 @@ int main( int argc, char ** argv )
 
     for ( int i=0; i<v_H1.size(); i++ ) {
         Halfedge * h = v_H1.at(i);
-        cout << h->id;
-        if ( h->he_e != NULL ) {
-            cout << " <-> " << h->he_e->id;
-        }
-        cout << endl;
+        h->print();
     }
 
     cout << "b v_V1: " << v_V1.size() << endl;
