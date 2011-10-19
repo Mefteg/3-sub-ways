@@ -461,6 +461,62 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
         }
     }
 
+    old_size = v_Face->size();
+    //pour chaque face
+    for ( int i=0; i<old_size; i++ ) {
+        //je la divise
+        Face * f = v_Face->at(i);
+        //pour chaque ancienne arete de la face
+        Halfedge * h1 = f->he;
+        Halfedge * h2 = h1->he_n->he_n;
+        Halfedge * h3 = h2->he_n->he_n;
+        Halfedge * ha = h1->he_n;
+        Halfedge * hb = h2->he_n;
+        Halfedge * hc = h3->he_n;
+
+        Face * f1 = new Face(h1);
+        Face * f2 = new Face(h2);
+        Face * f3 = new Face(h3);
+
+        Halfedge * hf1 = new Halfedge(h3->v, hc, NULL, f1);
+        Halfedge * hf1e = new Halfedge(h1->v, NULL, hf1, f);
+        hf1->he_e = hf1e;
+        h1->he_n = hf1;
+        f->he = hf1;
+
+        Halfedge * hf2 = new Halfedge(h1->v, ha, NULL, f2);
+        Halfedge * hf2e = new Halfedge(h2->v, NULL, hf2, f);
+        hf2->he_e = hf2e;
+        h2->he_n = hf2;
+
+        Halfedge * hf3 = new Halfedge(h2->v, hb, NULL, f3);
+        Halfedge * hf3e = new Halfedge(h3->v, NULL, hf3, f);
+        hf3->he_e = hf3e;
+        h3->he_n = hf3;
+
+        hf1e->he_n = hf2e;
+        hf2e->he_n = hf3e;
+        hf3e->he_n = hf1e;
+
+        h1->f = f1;
+        h2->f = f2;
+        h3->f = f3;
+        ha->f = f2;
+        hb->f = f3;
+        hc->f = f1;
+
+        v_Halfedge->push_back(hf1);
+        v_Halfedge->push_back(hf1e);
+        v_Halfedge->push_back(hf2);
+        v_Halfedge->push_back(hf2e);
+        v_Halfedge->push_back(hf3);
+        v_Halfedge->push_back(hf3e);
+
+        v_Face->push_back(f1);
+        v_Face->push_back(f2);
+        v_Face->push_back(f3);
+    }
+
     int size = v_Halfedge->size();
     for ( int i=0; i<size; i++ ) {
         h = v_Halfedge->at(i);
@@ -471,7 +527,7 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
 int main( int argc, char ** argv )
 {
     int n=4;
-    int nb_pas = 4;
+    int nb_pas = 3;
 
     Vertex ** t_Maillage = (Vertex **) malloc(sizeof(Vertex *)*nb_pas*nb_pas);
     Vertex ** t_Vertex = (Vertex **) malloc(sizeof(Vertex *)*n*n*n);
@@ -529,8 +585,14 @@ int main( int argc, char ** argv )
         cout << endl;
     }
 
+    cout << "b v_V1: " << v_V1.size() << endl;
+    cout << "b v_H1: " << v_H1.size() << endl;
+    cout << "b v_F1: " << v_F1.size() << endl;
     Loop( &v_V1, &v_H1, &v_F1 );
     cout << "Loop -> Ok" << endl;
+    cout << "a v_V1: " << v_V1.size() << endl;
+    cout << "a v_H1: " << v_H1.size() << endl;
+    cout << "a v_F1: " << v_F1.size() << endl;
 
     Halfedge::exportToObj( "import_export.obj", &v_V1, &v_F1 );
     cout << "exportToObj import_export -> Ok" << endl;
