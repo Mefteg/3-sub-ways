@@ -6,6 +6,7 @@ int Vertex::ID=0;
 Vertex::Vertex() {
     this->id = Vertex::ID;
     Vertex::ID++;
+    this->done = false;
 }
 
 Vertex::Vertex(gk::Point v, Halfedge * h, int i) {
@@ -15,6 +16,7 @@ Vertex::Vertex(gk::Point v, Halfedge * h, int i) {
     this->n=gk::Vector(0,0,0);
     this->id = Vertex::ID;
     Vertex::ID++;
+    this->done = false;
 }
 
 bool Vertex::belongsToFace( Face * f ) {
@@ -54,28 +56,28 @@ std::vector<Vertex*> Vertex::getNeighbours()
 {
 	vector<Vertex*> neighbours = vector<Vertex*>();
 	Halfedge* temp = this->he->he_e;
-	
+
 	for(;;)
 	{
 		if(temp->v->isIn(neighbours)) return neighbours;
-		
+
 		neighbours.push_back(temp->v);
 		if(temp->getPrevious()->he_e) temp = temp->getPrevious()->he_e;
 		else break;
 	}
-	
+
 	if(this->he->he_n) temp = this->he->he_n;
 	else return neighbours;
-	
+
 	for(;;)
 	{
 		neighbours.push_back(temp->v);
 		if(temp->he_e->he_n) temp = temp->he_e->he_n;
 		else break;
 	}
-	
+
 	return neighbours;
-	
+
 }
 
 string Vertex::toObj() {
