@@ -69,7 +69,8 @@ void Face::print() {
 
     for ( int i=0; i<v_H.size(); i++ ) {
         Halfedge * h = v_H.at(i);
-        cout << h->id << " -> ";
+        h->print();
+        cout << " => ";
     }
     cout << endl;
 }

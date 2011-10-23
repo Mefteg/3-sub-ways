@@ -29,6 +29,7 @@ class Vertex {
         gk::Vector n; //normal
         int ind; //indique la place du vertex dans un fichier obj ( lors de l'export )
         int id; //indique le numéro du vertex
+        bool done;
 
         Vertex();
         Vertex(gk::Point, Halfedge * h=NULL, int i=0);
@@ -40,12 +41,12 @@ class Vertex {
 
         //retourne toutes les faces possedant le vertex
         vector<Face *> getFaces(vector<Face *> *);
-	
-	// teste si un vertex est dans un vecteur
-	bool isIn(vector<Vertex*> vector);
-	
-	// retourne tout les vertex voisins
-	vector<Vertex *> getNeighbours();
+
+        // teste si un vertex est dans un vecteur
+        bool isIn(vector<Vertex*> vector);
+
+        // retourne tout les vertex voisins
+        vector<Vertex *> getNeighbours();
 
         string toObj();
 

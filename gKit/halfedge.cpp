@@ -27,7 +27,10 @@ void Halfedge::getVertex(Vertex ** a, Vertex ** b) {
 }
 
 Vertex * Halfedge::getOrigin() {
-    Halfedge * h = this->getPrevious();
+    Halfedge * h = this->he_e;
+    if ( h == NULL ) {
+        h = this->getPrevious();
+    }
     return h->v;
 }
 
@@ -125,27 +128,6 @@ void Halfedge::computeNormals(Vertex ** t_Maillage, int nb_pas, vector<Face *> *
     }
 }
 
-string Halfedge::pointToObj( Vertex * p ) {
-    ostringstream oss;
-    oss << "v " << p->v[0] << " " << p->v[1] << " " << p->v[2] << endl;
-    oss << "vn " << p->n[0] << " " << p->n[1] << " " << p->n[2] << endl;
-
-    return oss.str();
-}
-
-string Halfedge::faceToObj( Face * f ) {
-    Halfedge * he1 = f->he;
-    Halfedge * he2 = he1->he_n;
-    Halfedge * he3 = he2->he_n;
-
-    ostringstream oss;
-    oss << "f " << he1->v->ind << "//" << he1->v->ind << " ";
-    oss << he2->v->ind << "//" << he2->v->ind << " ";
-    oss << he3->v->ind << "//" << he3->v->ind << endl;
-
-    return oss.str();
-}
-
 void evenHalfedge( Vertex * a, Vertex * b, Halfedge * he1, Halfedge * he2 ) {
     //si a et b ont deja une arete associée
     if ( a->he != he1 && b->he != he2 ) {
@@ -207,9 +189,9 @@ Halfedge * Halfedge::subdivise() {
 }
 
 void Halfedge::print() {
-    cout << this->id << "->v" << this->id;
+    cout << this->id << "->v" << this->v->id;
     if ( this->he_e != NULL ) {
-        cout << " <-> " << this->he_e->id << "->v" << this->id;
+        cout << " (<-> " << this->he_e->id << "->v" << this->he_e->v->id << ") ";
     }
     cout << endl;
 }
