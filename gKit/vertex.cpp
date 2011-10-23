@@ -44,6 +44,40 @@ vector<Face *> Vertex::getFaces( vector<Face *> * v_Face ) {
     return v_F;
 }
 
+bool Vertex::isIn(std::vector<Vertex*> vector)
+{
+	for(int i = 0; i < vector.size(); ++i) if(vector.at(i) = this) return true;
+	return false;
+}
+
+std::vector<Vertex*> Vertex::getNeighbours()
+{
+	vector<Vertex*> neighbours = vector<Vertex*>();
+	Halfedge* temp = this->he->he_e;
+	
+	for(;;)
+	{
+		if(temp->v->isIn(neighbours)) return neighbours;
+		
+		neighbours.push_back(temp->v);
+		if(temp->getPrevious()->he_e) temp = temp->getPrevious()->he_e;
+		else break;
+	}
+	
+	if(this->he->he_n) temp = this->he->he_n;
+	else return neighbours;
+	
+	for(;;)
+	{
+		neighbours.push_back(temp->v);
+		if(temp->he_e->he_n) temp = temp->he_e->he_n;
+		else break;
+	}
+	
+	return neighbours;
+	
+}
+
 string Vertex::toObj() {
     ostringstream oss;
     oss << "v " << this->v[0] << " " << this->v[1] << " " << this->v[2] << endl;
