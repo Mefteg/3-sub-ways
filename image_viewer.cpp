@@ -532,6 +532,268 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
     }
 }
 
+void Butterfly(vector<Vertex *>* vertex, vector<Halfedge *>* halfedges, vector<Face *>* faces)
+{
+	Halfedge * h;
+	int old_size = halfedges->size();
+	
+	//pour chaque arete
+	for (int i = 0; i < old_size; ++i)
+	{
+		h = halfedges->at(i);
+		
+		//si l'arete n'a pas deja été traitée par sa paire
+		if (h->done == false)
+		{
+			if(h->he_e)
+			{
+				Halfedge * h_e = h->he_e;
+				
+				//on subdivise les deux
+				Halfedge * h2 = h->subdivise();
+				Halfedge * h_e2 = h_e->subdivise();
+				halfedges->push_back(h2);
+				halfedges->push_back(h_e2);
+				
+				//et on supprime l'un des sommets
+				delete h_e->v;
+				h_e->v = h->v;
+				vertex->push_back(h->v);
+				
+				vector<Vertex*> neighbour1 = h_e2->v->getNeighbours();
+				vector<Vertex*> neighbour2 = h2->v->getNeighbours();
+				
+				// The edge connects two vertices of valence 6
+				if((neighbour1.size() == 6) && (neighbour2.size() == 6))
+				{
+					// Calcul des coordonnées de h->v
+					Vertex* h_11 = h->getPrevious()->he_e->he_n->v;
+					Vertex* h_12 = h2->he_n->v;
+					Vertex* h_13 = h2->he_n->he_e->he_n->v;
+					
+					Vertex* h_21 = h->getOrigin();
+					Vertex* h_22 = h2->v;
+					
+					Vertex* h_31 = h_e2->he_n->he_e->he_n->v;
+					Vertex* h_32 = h_e2->he_n->v;
+					Vertex* h_33 = h_e->getPrevious()->he_e->he_n->v;
+					
+					h->v->v.x = (-1/16)*h_11->v.x + (1/8)*h_12->v.x + (-1/16)*h_13->v.x + (1/2)*h_21->v.x + (1/2)*h_22->v.x + (-1/16)*h_31->v.x + (1/8)*h_32->v.x + (-1/16)*h_33->v.x;
+					h->v->v.y = (-1/16)*h_11->v.y + (1/8)*h_12->v.y + (-1/16)*h_13->v.y + (1/2)*h_21->v.y + (1/2)*h_22->v.y + (-1/16)*h_31->v.y + (1/8)*h_32->v.y + (-1/16)*h_33->v.y;
+					h->v->v.z = (-1/16)*h_11->v.z + (1/8)*h_12->v.z + (-1/16)*h_13->v.z + (1/2)*h_21->v.z + (1/2)*h_22->v.z + (-1/16)*h_31->v.z + (1/8)*h_32->v.z + (-1/16)*h_33->v.z;
+				}
+				// The edge connects a K-vertex (extraordinary vertice, K != 6) and a 6-vertex
+				else if (((neighbour1.size() == 6) && (neighbour2.size() != 6)) || ((neighbour1.size() != 6) && (neighbour2.size() == 6)))
+				{
+					Vertex* v_irregular;
+					Vertex* v_regular;
+					vector<Vertex*> neighbour_irregular;
+					vector<Vertex*> neighbour_regular;
+					
+					if(neighbour1.size() != 6)
+					{
+						v_irregular = h_e2->v;
+						v_regular = h2->v;
+						neighbour_irregular = neighbour1;
+						neighbour_regular = neighbour2;
+					}
+					else
+					{
+						v_irregular = h2->v;
+						v_regular = h_e2->v;
+						neighbour_irregular = neighbour2;
+						neighbour_regular = neighbour1;
+					}
+					
+					
+					
+					
+					int K = neighbour_irregular.size();
+					
+					if(K >= 5)
+					{
+						h->v->v.x = h->v->v.y = h->v->v.z = 0;
+					  
+						double weight = 0;
+						for(int i = 0; i < K; ++i)
+						{
+							weight = (1/4 + cos((2*PI*i)/K) + (1/2) * cos((4*PI*i)/K)) / K;
+							
+							h->v->v.x += weight * neighbour_irregular.at(i)->v.x;
+							h->v->v.y += weight * neighbour_irregular.at(i)->v.y;
+							h->v->v.z += weight * neighbour_irregular.at(i)->v.z;
+						}
+						
+						// Vertex* h_1 = h2->he_n->he_e->he_n->v;
+						// Vertex* h_3 = h_e->getPrevious()->he_e->he_n->v;
+						
+						
+					}
+					else if(K = 4)
+					{
+						Vertex* h_11 = h->getPrevious()->he_e->v;
+						//Vertex* h_12 = h2->he_n->he_e->he_n->v;
+						
+						Vertex* h_21 = h->getPrevious()->he_e->he_n->v;
+						Vertex* h_22 = h2->v;
+						
+						Vertex* h_31 = h_e2->he_n->v;
+						//Vertex* h_32 = h_e->getPrevious()->he_e->he_n->v;
+						
+						h->v->v.x = /*(3/8)*h_12->v.x + */(-1/8)*h_21->v.x + (3/8)*h_22->v.x/* + (3/8)*h_32->v.x*/;
+						h->v->v.y = /*(3/8)*h_12->v.y + */(-1/8)*h_21->v.y + (3/8)*h_22->v.y/* + (3/8)*h_32->v.y*/;
+						h->v->v.z = /*(3/8)*h_12->v.z + */(-1/8)*h_21->v.z + (3/8)*h_22->v.z/* + (3/8)*h_32->v.z*/;
+					}
+					else if(K = 3)
+					{
+						Vertex* h_11 = h->getPrevious()->he_e->v;
+						//Vertex* h_12 = h2->he_n->he_e->he_n->v;
+						
+						Vertex* h_21 = h2->v;
+						
+						Vertex* h_31 = h_e2->he_n->v;
+						//Vertex* h_32 = h_e->getPrevious()->he_e->he_n->v;
+						
+						h->v->v.x = (-1/12)*h_11->v.x +/* (9/24)*h_12->v.x +*/ (5/12)*h_21->v.x + (-1/12)*h_31->v.x/* + (9/24)*h_32->v.x*/;
+						h->v->v.y = (-1/12)*h_11->v.y +/* (9/24)*h_12->v.y +*/ (5/12)*h_21->v.y + (-1/12)*h_31->v.y/* + (9/24)*h_32->v.y*/;
+						h->v->v.z = (-1/12)*h_11->v.z +/* (9/24)*h_12->v.z +*/ (5/12)*h_21->v.z + (-1/12)*h_31->v.z/* + (9/24)*h_32->v.z*/;
+					}
+					
+				}
+				// The edge connects two extraordinary vertices
+				else if((neighbour1.size() != 6) && (neighbour2.size() != 6))
+				{
+					int K1 = neighbour1.size();
+					int K2 = neighbour2.size();
+					
+					if(K1 >= 5)
+					{
+						h->v->v.x = h->v->v.y = h->v->v.z = 0;
+					  
+						double weight = 0;
+						for(int i = 0; i < K1; ++i)
+						{
+							weight = (1/4 + cos((2*PI*i)/K1) + (1/2) * cos((4*PI*i)/K1)) / K1;
+							
+							h->v->v.x += weight * neighbour1.at(i)->v.x;
+							h->v->v.y += weight * neighbour1.at(i)->v.y;
+							h->v->v.z += weight * neighbour1.at(i)->v.z;
+						}
+					}
+					else if(K1 = 4)
+					{
+						Vertex* h_11 = h->getPrevious()->he_e->v;
+
+						Vertex* h_21 = h->getPrevious()->he_e->he_n->v;
+						Vertex* h_22 = h2->v;
+						
+						Vertex* h_31 = h_e2->he_n->v;
+						
+						h->v->v.x = (-1/8)*h_21->v.x + (3/8)*h_22->v.x;
+						h->v->v.y = (-1/8)*h_21->v.y + (3/8)*h_22->v.y;
+						h->v->v.z = (-1/8)*h_21->v.z + (3/8)*h_22->v.z;
+					}
+					else if(K1 = 3)
+					{
+						Vertex* h_11 = h->getPrevious()->he_e->v;						
+						Vertex* h_21 = h2->v;
+						Vertex* h_31 = h_e2->he_n->v;
+						
+						h->v->v.x = (-1/12)*h_11->v.x + (5/12)*h_21->v.x + (-1/12)*h_31->v.x;
+						h->v->v.y = (-1/12)*h_11->v.y + (5/12)*h_21->v.y + (-1/12)*h_31->v.y;
+						h->v->v.z = (-1/12)*h_11->v.z + (5/12)*h_21->v.z + (-1/12)*h_31->v.z;
+					}
+
+
+
+					if(K2 >= 5)
+					{					  
+						double weight = 0;
+						for(int i = 0; i < K1; ++i)
+						{
+							weight = (1/4 + cos((2*PI*i)/K2) + (1/2) * cos((4*PI*i)/K2)) / K2;
+							
+							h->v->v.x += weight * neighbour2.at(i)->v.x;
+							h->v->v.y += weight * neighbour2.at(i)->v.y;
+							h->v->v.z += weight * neighbour2.at(i)->v.z;
+						}
+					}
+					else if(K2 = 4)
+					{
+						Vertex* h_11 = h2->he_n->v;
+
+						Vertex* h_21 = h2->he_n->he_e->he_n->v;
+						Vertex* h_22 = h->getOrigin();
+						
+						Vertex* h_31 = h_e2->he_n->v;
+						
+						h->v->v.x = (-1/8)*h_21->v.x + (3/8)*h_22->v.x;
+						h->v->v.y = (-1/8)*h_21->v.y + (3/8)*h_22->v.y;
+						h->v->v.z = (-1/8)*h_21->v.z + (3/8)*h_22->v.z;
+					}
+					else if(K1 = 3)
+					{
+						Vertex* h_11 = h2->he_n->v;						
+						Vertex* h_21 = h->getOrigin();
+						Vertex* h_31 = h_e->getPrevious()->getOrigin();
+						
+						h->v->v.x = (-1/12)*h_11->v.x + (5/12)*h_21->v.x + (-1/12)*h_31->v.x;
+						h->v->v.y = (-1/12)*h_11->v.y + (5/12)*h_21->v.y + (-1/12)*h_31->v.y;
+						h->v->v.z = (-1/12)*h_11->v.z + (5/12)*h_21->v.z + (-1/12)*h_31->v.z;
+					}
+				}
+				
+				h->done = true;
+				h2->done = true;
+				h_e->done = true;
+				h_e2->done = true;
+			}
+			// Boundary edges
+			else
+			{				
+				//on subdivise les deux
+				Halfedge * h2 = h->subdivise();
+				halfedges->push_back(h2);
+				
+				//et on supprime l'un des sommets
+				vertex->push_back(h->v);
+				
+				vector<Vertex*> neighbour1 = h->getOrigin()->getNeighbours();
+				vector<Vertex*> neighbour2 = h2->v->getNeighbours();
+				
+				Halfedge* temp_n1 = h;
+				Halfedge* temp_n2 = h;
+				for(int i = 0; i < neighbour1.size()-2; ++i)
+				{
+					temp_n1 = temp_n1->getPrevious()->he_e;
+					temp_n2 = temp_n2->he_n->he_e;
+				}
+				
+				Vertex* h_1 = temp_n1->he_n->v;
+				Vertex* h_2 = h->getOrigin();
+				Vertex* h_3 = h2->v;
+				Vertex* h_4 = temp_n2->he_n->v;
+				
+				h->v->v.x = (-1/16)*h_1->v.x + (9/16)*h_2->v.x + (9/16)*h_3->v.x + (-1/16)*h_4->v.x;
+				h->v->v.y = (-1/16)*h_1->v.y + (9/16)*h_2->v.y + (9/16)*h_3->v.y + (-1/16)*h_4->v.y;
+				h->v->v.z = (-1/16)*h_1->v.z + (9/16)*h_2->v.z + (9/16)*h_3->v.z + (-1/16)*h_4->v.z;
+				
+				h->done = true;
+				h2->done = true;
+			}
+		}
+	}
+
+	int size = halfedges->size();
+	for (int i = 0; i < size; ++i)
+	{
+		h = halfedges->at(i);
+		h->done = false;
+	}
+	
+	// Créer les faces
+}
+
 int main( int argc, char ** argv )
 {
     int n=4;
