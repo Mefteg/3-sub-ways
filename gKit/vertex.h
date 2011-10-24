@@ -33,6 +33,7 @@ class Vertex {
 
         Vertex();
         Vertex(gk::Point, Halfedge * h=NULL, int i=0);
+        Vertex(Vertex * v);
 
         static int ID;
 
@@ -44,6 +45,8 @@ class Vertex {
 
         // teste si un vertex est dans un vecteur
         bool isIn(vector<Vertex*> vector);
+        //retourne vrai si le vertex est sur une bordure
+        bool isOnBorder();
 
         // retourne tout les vertex voisins
         vector<Vertex *> getNeighbours();

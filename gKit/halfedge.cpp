@@ -225,7 +225,6 @@ void Halfedge::importFromObj(string filename, vector<Vertex *> * v_Vertex, vecto
                             int d = hi->compareHalfedge(hj);
                             //si les aretes sont voisines
                             if ( d != 0 ) {
-                                cout << "une adjacence!" << endl;
                                 //je leur donne leur voisine
                                 hi->he_e = hj;
                                 hj->he_e = hi;
