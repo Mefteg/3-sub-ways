@@ -549,7 +549,7 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
     }
 }
 
-void Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, vector<Face*>* faces)
+void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, vector<Face*>* faces)
 {
 	Halfedge * h;
 	int old_size = halfedges->size();
@@ -927,6 +927,9 @@ int main( int argc, char ** argv )
 
     Loop( &v_V1, &v_H1, &v_F1 );
     cout << "Loop -> Ok" << endl;
+    
+//    modified_Butterfly( &v_V1, &v_H1, &v_F1 );
+//    cout << "modified_Butterfly -> Ok" << endl;
 
     Halfedge::exportToObj( "import_export.obj", &v_V1, &v_F1 );
     cout << "exportToObj import_export -> Ok" << endl;
