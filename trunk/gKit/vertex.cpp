@@ -19,6 +19,15 @@ Vertex::Vertex(gk::Point v, Halfedge * h, int i) {
     this->done = false;
 }
 
+Vertex::Vertex(Vertex * v) {
+    this->v=v->v;
+    this->he=v->he;
+    this->ind=v->ind;
+    this->n=v->n;
+    this->id = v->id;
+    this->done = v->done;
+}
+
 bool Vertex::belongsToFace( Face * f ) {
     vector<Vertex *> v_V = f->getVertex();
     bool found = false;
@@ -52,31 +61,55 @@ bool Vertex::isIn(std::vector<Vertex*> vector)
 	return false;
 }
 
+bool Vertex::isOnBorder() {
+    Halfedge * h = this->he;
+    Halfedge * hb = h;
+    int cpt=0;
+    while ( hb->he_e != NULL && (hb != h || cpt == 0 ) ) {
+        hb = hb->he_e->getPrevious();
+        cpt++;
+    }
+
+    //si on a fait le tour des aretes poitant vers le vertex
+    if ( hb == h && cpt > 0 ) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
 std::vector<Vertex*> Vertex::getNeighbours()
 {
 	vector<Vertex*> neighbours = vector<Vertex*>();
-	Halfedge* temp = this->he->he_e;
+    //je récupère les aretes qui sont sur les bordures
+    Halfedge * h = this->he;
+    Halfedge * hb = h;
+    //neighbours.push_back(hb->getOrigin());
+    int cpt=0;
+    //je parcours le côté gauche
+    while ( hb->he_e != NULL && (hb != h || cpt == 0 ) ) {
+        hb = hb->he_e->getPrevious();
+        neighbours.push_back(hb->getOrigin());
+        cpt++;
+    }
 
-	for(;;)
-	{
-		if(temp->v->isIn(neighbours)) return neighbours;
+    //si j'ai fait le tour de tous les voisins
+    if ( hb == h ) {
+        return neighbours;
+    }
+    //sinon
+    else {
+        hb = h->he_n;
+        neighbours.push_back(hb->v);
+        //je parcours le côté droit
+        while ( hb->he_e != NULL && hb != h->he_n ) {
+            hb = hb->he_e->he_n;
+            neighbours.push_back(hb->v);
+        }
 
-		neighbours.push_back(temp->v);
-		if(temp->getPrevious()->he_e) temp = temp->getPrevious()->he_e;
-		else break;
-	}
-
-	if(this->he->he_n) temp = this->he->he_n;
-	else return neighbours;
-
-	for(;;)
-	{
-		neighbours.push_back(temp->v);
-		if(temp->he_e->he_n) temp = temp->he_e->he_n;
-		else break;
-	}
-
-	return neighbours;
+        return neighbours;
+    }
 
 }
 

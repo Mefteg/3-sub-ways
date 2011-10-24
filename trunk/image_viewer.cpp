@@ -421,10 +421,10 @@ void DeCasteljau( Vertex ** t_Maillage, int nb_pas, Vertex ** t_Vertex, int n ) 
     }
 }
 
-// !! ne fonctionne pas, probleme avec les aretes paires surement !!
 void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<Face *> * v_Face ) {
     Halfedge * h;
     int old_size = v_Halfedge->size();
+    int old_size_vertex = v_Vertex->size();
     //pour chaque arete
     for ( int i=0; i<old_size; i++ ) {
         h = v_Halfedge->at(i);
@@ -469,7 +469,6 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
     old_size = v_Face->size();
     //pour chaque face
     for ( int i=0; i<old_size; i++ ) {
-        cout << "Face " << i << endl;
         //je la divise
         Face * f = v_Face->at(i);
         //pour chaque ancienne arete de la face
@@ -523,23 +522,62 @@ void Loop( vector<Vertex *> * v_Vertex, vector<Halfedge *> * v_Halfedge, vector<
         v_Face->push_back(f1);
         v_Face->push_back(f2);
         v_Face->push_back(f3);
-
-        f1->print();
-        cout << " ~~~ " << endl;
-        f->print();
     }
 
-    //pour chaque arete
-    for ( int i=0; i<v_Halfedge->size(); i++ ) {
-        Halfedge * h = v_Halfedge->at(i);
+    vector<Vertex *> v_V = vector<Vertex *>();
+    //je copie tous mes vieux points
+    //vector<Vertex *> v_V = vector<Vertex *>();
+    //je copie tous mes points
+    for ( int i=0; i<v_Vertex->size(); i++ ) {
+        v_V.push_back(new Vertex(v_Vertex->at(i)));
+    }
 
-        //si son sommet extremité n'a pas été traité
-        if ( !h->v->done ) {
-            //si l'arete n'a pas de paire
-            if ( h->he_e == NULL ) {
+    //pour chaque sommet
+    for ( int i=0; i<v_V.size(); i++ ) {
+        Vertex * v = v_V.at(i);
 
+        //si le sommet est sur une bordure
+        if ( v->isOnBorder() ) {
+            //je récupère les aretes qui sont sur la bordure
+            Halfedge * h = v->he;
+            Halfedge * hb = h;
+            int cpt=0;
+            //d'abord l'arete de gauche
+            while ( hb->he_e != NULL && (hb != h || cpt == 0 ) ) {
+                hb = hb->he_e->getPrevious();
+                cpt++;
             }
+            Halfedge * h_l = hb;
+
+            hb = h->he_n;
+            //puis l'arete de droite
+            while ( hb->he_e != NULL && (hb != h->he_n || cpt == 0 ) ) {
+                hb = hb->he_e->he_n;
+                cpt++;
+            }
+            Halfedge * h_r = hb;
+
+            Vertex * a = h_l->getOrigin();
+            Vertex * b = h_r->v;
+
+            v->v = 0.125*a->v + 0.75*v->v + 0.125*b->v;
         }
+        //sinon
+        else {
+            //je fais la moyenne
+            int n = v->getNeighbours().size();
+            cout << "Nombre de voisins: " << n << endl;
+            float tmp = (3.0+2.0*cos(2.0*3.1416/n));
+            tmp = tmp * tmp;
+            cout << "temp: " << tmp << endl;
+            float an = (1.0/64.0)*(40.0-tmp);
+            cout << "an: " << an << endl;
+            v->v = (1-an)*v->v;
+        }
+    }
+
+    for ( int i=0; i<v_V.size(); i++ ) {
+        v_Vertex->at(i)->v = v_V.at(i)->v;
     }
 
     int size = v_Halfedge->size();
@@ -553,34 +591,35 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 {
 	Halfedge * h;
 	int old_size = halfedges->size();
-	
+    float PI=3.1416;
+
 	/*** Calcul des nouveaux points ***/
 	//pour chaque arete
 	for (int i = 0; i < old_size; ++i)
 	{
 		h = halfedges->at(i);
-		
+
 		//si l'arete n'a pas deja été traitée par sa paire
 		if (h->done == false)
 		{
 			if(h->he_e)
 			{
 				Halfedge * h_e = h->he_e;
-				
+
 				//on subdivise les deux
 				Halfedge * h2 = h->subdivise();
 				Halfedge * h_e2 = h_e->subdivise();
 				halfedges->push_back(h2);
 				halfedges->push_back(h_e2);
-				
+
 				//et on supprime l'un des sommets
 				delete h_e->v;
 				h_e->v = h->v;
 				vertex->push_back(h->v);
-				
+
 				vector<Vertex*> neighbour1 = h_e2->v->getNeighbours();
 				vector<Vertex*> neighbour2 = h2->v->getNeighbours();
-				
+
 				// The edge connects two vertices of valence 6
 				if((neighbour1.size() == 6) && (neighbour2.size() == 6))
 				{
@@ -588,14 +627,14 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 					Vertex* h_11 = h->getPrevious()->he_e->he_n->v;
 					Vertex* h_12 = h2->he_n->v;
 					Vertex* h_13 = h2->he_n->he_e->he_n->v;
-					
+
 					Vertex* h_21 = h->getOrigin();
 					Vertex* h_22 = h2->v;
-					
+
 					Vertex* h_31 = h_e2->he_n->he_e->he_n->v;
 					Vertex* h_32 = h_e2->he_n->v;
 					Vertex* h_33 = h_e->getPrevious()->he_e->he_n->v;
-					
+
 					h->v->v.x = (-1/16)*h_11->v.x + (1/8)*h_12->v.x + (-1/16)*h_13->v.x + (1/2)*h_21->v.x + (1/2)*h_22->v.x + (-1/16)*h_31->v.x + (1/8)*h_32->v.x + (-1/16)*h_33->v.x;
 					h->v->v.y = (-1/16)*h_11->v.y + (1/8)*h_12->v.y + (-1/16)*h_13->v.y + (1/2)*h_21->v.y + (1/2)*h_22->v.y + (-1/16)*h_31->v.y + (1/8)*h_32->v.y + (-1/16)*h_33->v.y;
 					h->v->v.z = (-1/16)*h_11->v.z + (1/8)*h_12->v.z + (-1/16)*h_13->v.z + (1/2)*h_21->v.z + (1/2)*h_22->v.z + (-1/16)*h_31->v.z + (1/8)*h_32->v.z + (-1/16)*h_33->v.z;
@@ -607,7 +646,7 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 					Vertex* v_regular;
 					vector<Vertex*> neighbour_irregular;
 					vector<Vertex*> neighbour_regular;
-					
+
 					if(neighbour1.size() != 6)
 					{
 						v_irregular = h_e2->v;
@@ -622,42 +661,42 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 						neighbour_irregular = neighbour2;
 						neighbour_regular = neighbour1;
 					}
-					
-					
-					
-					
+
+
+
+
 					int K = neighbour_irregular.size();
-					
+
 					if(K >= 5)
 					{
 						h->v->v.x = h->v->v.y = h->v->v.z = 0;
-					  
+
 						double weight = 0;
 						for(int i = 0; i < K; ++i)
 						{
 							weight = (1/4 + cos((2*PI*i)/K) + (1/2) * cos((4*PI*i)/K)) / K;
-							
+
 							h->v->v.x += weight * neighbour_irregular.at(i)->v.x;
 							h->v->v.y += weight * neighbour_irregular.at(i)->v.y;
 							h->v->v.z += weight * neighbour_irregular.at(i)->v.z;
 						}
-						
+
 						// Vertex* h_1 = h2->he_n->he_e->he_n->v;
 						// Vertex* h_3 = h_e->getPrevious()->he_e->he_n->v;
-						
-						
+
+
 					}
 					else if(K = 4)
 					{
 						Vertex* h_11 = h->getPrevious()->he_e->v;
 						//Vertex* h_12 = h2->he_n->he_e->he_n->v;
-						
+
 						Vertex* h_21 = h->getPrevious()->he_e->he_n->v;
 						Vertex* h_22 = h2->v;
-						
+
 						Vertex* h_31 = h_e2->he_n->v;
 						//Vertex* h_32 = h_e->getPrevious()->he_e->he_n->v;
-						
+
 						h->v->v.x = /*(3/8)*h_12->v.x + */(-1/8)*h_21->v.x + (3/8)*h_22->v.x/* + (3/8)*h_32->v.x*/;
 						h->v->v.y = /*(3/8)*h_12->v.y + */(-1/8)*h_21->v.y + (3/8)*h_22->v.y/* + (3/8)*h_32->v.y*/;
 						h->v->v.z = /*(3/8)*h_12->v.z + */(-1/8)*h_21->v.z + (3/8)*h_22->v.z/* + (3/8)*h_32->v.z*/;
@@ -666,33 +705,33 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 					{
 						Vertex* h_11 = h->getPrevious()->he_e->v;
 						//Vertex* h_12 = h2->he_n->he_e->he_n->v;
-						
+
 						Vertex* h_21 = h2->v;
-						
+
 						Vertex* h_31 = h_e2->he_n->v;
 						//Vertex* h_32 = h_e->getPrevious()->he_e->he_n->v;
-						
+
 						h->v->v.x = (-1/12)*h_11->v.x +/* (9/24)*h_12->v.x +*/ (5/12)*h_21->v.x + (-1/12)*h_31->v.x/* + (9/24)*h_32->v.x*/;
 						h->v->v.y = (-1/12)*h_11->v.y +/* (9/24)*h_12->v.y +*/ (5/12)*h_21->v.y + (-1/12)*h_31->v.y/* + (9/24)*h_32->v.y*/;
 						h->v->v.z = (-1/12)*h_11->v.z +/* (9/24)*h_12->v.z +*/ (5/12)*h_21->v.z + (-1/12)*h_31->v.z/* + (9/24)*h_32->v.z*/;
 					}
-					
+
 				}
 				// The edge connects two extraordinary vertices
 				else if((neighbour1.size() != 6) && (neighbour2.size() != 6))
 				{
 					int K1 = neighbour1.size();
 					int K2 = neighbour2.size();
-					
+
 					if(K1 >= 5)
 					{
 						h->v->v.x = h->v->v.y = h->v->v.z = 0;
-					  
+
 						double weight = 0;
 						for(int i = 0; i < K1; ++i)
 						{
 							weight = (1/4 + cos((2*PI*i)/K1) + (1/2) * cos((4*PI*i)/K1)) / K1;
-							
+
 							h->v->v.x += weight * neighbour1.at(i)->v.x;
 							h->v->v.y += weight * neighbour1.at(i)->v.y;
 							h->v->v.z += weight * neighbour1.at(i)->v.z;
@@ -704,19 +743,19 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 
 						Vertex* h_21 = h->getPrevious()->he_e->he_n->v;
 						Vertex* h_22 = h2->v;
-						
+
 						Vertex* h_31 = h_e2->he_n->v;
-						
+
 						h->v->v.x = (-1/8)*h_21->v.x + (3/8)*h_22->v.x;
 						h->v->v.y = (-1/8)*h_21->v.y + (3/8)*h_22->v.y;
 						h->v->v.z = (-1/8)*h_21->v.z + (3/8)*h_22->v.z;
 					}
 					else if(K1 = 3)
 					{
-						Vertex* h_11 = h->getPrevious()->he_e->v;						
+						Vertex* h_11 = h->getPrevious()->he_e->v;
 						Vertex* h_21 = h2->v;
 						Vertex* h_31 = h_e2->he_n->v;
-						
+
 						h->v->v.x = (-1/12)*h_11->v.x + (5/12)*h_21->v.x + (-1/12)*h_31->v.x;
 						h->v->v.y = (-1/12)*h_11->v.y + (5/12)*h_21->v.y + (-1/12)*h_31->v.y;
 						h->v->v.z = (-1/12)*h_11->v.z + (5/12)*h_21->v.z + (-1/12)*h_31->v.z;
@@ -725,12 +764,12 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 
 
 					if(K2 >= 5)
-					{					  
+					{
 						double weight = 0;
 						for(int i = 0; i < K1; ++i)
 						{
 							weight = (1/4 + cos((2*PI*i)/K2) + (1/2) * cos((4*PI*i)/K2)) / K2;
-							
+
 							h->v->v.x += weight * neighbour2.at(i)->v.x;
 							h->v->v.y += weight * neighbour2.at(i)->v.y;
 							h->v->v.z += weight * neighbour2.at(i)->v.z;
@@ -742,25 +781,25 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 
 						Vertex* h_21 = h2->he_n->he_e->he_n->v;
 						Vertex* h_22 = h->getOrigin();
-						
+
 						Vertex* h_31 = h_e2->he_n->v;
-						
+
 						h->v->v.x = (-1/8)*h_21->v.x + (3/8)*h_22->v.x;
 						h->v->v.y = (-1/8)*h_21->v.y + (3/8)*h_22->v.y;
 						h->v->v.z = (-1/8)*h_21->v.z + (3/8)*h_22->v.z;
 					}
 					else if(K1 = 3)
 					{
-						Vertex* h_11 = h2->he_n->v;						
+						Vertex* h_11 = h2->he_n->v;
 						Vertex* h_21 = h->getOrigin();
 						Vertex* h_31 = h_e->getPrevious()->getOrigin();
-						
+
 						h->v->v.x = (-1/12)*h_11->v.x + (5/12)*h_21->v.x + (-1/12)*h_31->v.x;
 						h->v->v.y = (-1/12)*h_11->v.y + (5/12)*h_21->v.y + (-1/12)*h_31->v.y;
 						h->v->v.z = (-1/12)*h_11->v.z + (5/12)*h_21->v.z + (-1/12)*h_31->v.z;
 					}
 				}
-				
+
 				h->done = true;
 				h2->done = true;
 				h_e->done = true;
@@ -768,17 +807,17 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 			}
 			// Boundary edges
 			else
-			{				
+			{
 				//on subdivise les deux
 				Halfedge * h2 = h->subdivise();
 				halfedges->push_back(h2);
-				
+
 				//et on supprime l'un des sommets
 				vertex->push_back(h->v);
-				
+
 				vector<Vertex*> neighbour1 = h->getOrigin()->getNeighbours();
 				vector<Vertex*> neighbour2 = h2->v->getNeighbours();
-				
+
 				Halfedge* temp_n1 = h;
 				Halfedge* temp_n2 = h;
 				for(int i = 0; i < neighbour1.size()-2; ++i)
@@ -786,31 +825,29 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 					temp_n1 = temp_n1->getPrevious()->he_e;
 					temp_n2 = temp_n2->he_n->he_e;
 				}
-				
+
 				Vertex* h_1 = temp_n1->he_n->v;
 				Vertex* h_2 = h->getOrigin();
 				Vertex* h_3 = h2->v;
 				Vertex* h_4 = temp_n2->he_n->v;
-				
+
 				h->v->v.x = (-1/16)*h_1->v.x + (9/16)*h_2->v.x + (9/16)*h_3->v.x + (-1/16)*h_4->v.x;
 				h->v->v.y = (-1/16)*h_1->v.y + (9/16)*h_2->v.y + (9/16)*h_3->v.y + (-1/16)*h_4->v.y;
 				h->v->v.z = (-1/16)*h_1->v.z + (9/16)*h_2->v.z + (9/16)*h_3->v.z + (-1/16)*h_4->v.z;
-				
+
 				h->done = true;
 				h2->done = true;
 			}
 		}
 	}
-	
+
 	/*** Création des nouvelles faces ***/
 	old_size = faces->size();
 	//pour chaque face
 	for (int i = 0; i < old_size; ++i)
 	{
-		cout << "Face " << i << endl;
 		//je la divise
 		Face * f = faces->at(i);
-		f->print();
 		//pour chaque ancienne arete de la face
 		Halfedge * h1 = f->he;
 		Halfedge * h2 = h1->he_n->he_n;
@@ -862,7 +899,7 @@ void modified_Butterfly(vector<Vertex*>* vertex, vector<Halfedge*>* halfedges, v
 		faces->push_back(f2);
 		faces->push_back(f3);
 	}
-	
+
 
 	/*** Remise à zéro pour une prochaine subdivision ***/
 	int size = halfedges->size();
@@ -922,12 +959,12 @@ int main( int argc, char ** argv )
     vector<Vertex *> v_V1 = vector<Vertex *>();
     vector<Halfedge *> v_H1 = vector<Halfedge *>();
     vector<Face *> v_F1 = vector<Face *>();
-    Halfedge::importFromObj( "export.obj", &v_V1, &v_H1, &v_F1 );
-    cout << "importFromObj export -> Ok" << endl;
+    Halfedge::importFromObj( "icosphere.obj", &v_V1, &v_H1, &v_F1 );
+    cout << "icosphere export -> Ok" << endl;
 
     Loop( &v_V1, &v_H1, &v_F1 );
     cout << "Loop -> Ok" << endl;
-    
+
 //    modified_Butterfly( &v_V1, &v_H1, &v_F1 );
 //    cout << "modified_Butterfly -> Ok" << endl;
 
