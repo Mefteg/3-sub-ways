@@ -79,6 +79,53 @@ bool Vertex::isOnBorder() {
     }
 }
 
+/*
+std::vector<Vertex*> Vertex::getNeighbours()
+{
+	vector<Vertex*> neighbours = vector<Vertex*>();
+	Halfedge* temp = this->he->he_n;
+
+	// Sens horaire
+	for(;;)
+	{
+		if(temp->v->isIn(neighbours))
+		{
+			cout << "\t\tOn part via sens horaire !\n";
+			return neighbours;
+		}
+
+		neighbours.push_back(temp->v);
+		
+		cout << "Sens horaire\n";
+
+		if(temp->he_e) temp = temp->he_e->he_n;
+		else break;
+	}
+	cout << "On sort du sens horaire !\n";
+
+	if(this->he->he_e) temp = this->he->he_e;
+	else
+	{
+		cout << "\t\tOn part via sens trigonométrique !\n";
+		return neighbours;
+	}
+
+	// Sens trigonométrique
+	for(;;)
+	{
+		neighbours.push_back(temp->v);
+		
+		cout << "Sens trigonométrique\n";
+		
+		if(temp->getPrevious()->he_e) temp = temp->getPrevious()->he_e;
+		else break;
+	}
+	cout << "On sort du sens trigonométrique !\n";
+
+	return neighbours;
+}
+*/
+
 std::vector<Vertex*> Vertex::getNeighbours()
 {
 	vector<Vertex*> neighbours = vector<Vertex*>();
