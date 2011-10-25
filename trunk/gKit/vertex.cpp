@@ -129,34 +129,40 @@ std::vector<Vertex*> Vertex::getNeighbours()
 std::vector<Vertex*> Vertex::getNeighbours()
 {
 	vector<Vertex*> neighbours = vector<Vertex*>();
-    //je récupère les aretes qui sont sur les bordures
-    Halfedge * h = this->he;
-    Halfedge * hb = h;
-    //neighbours.push_back(hb->getOrigin());
-    int cpt=0;
-    //je parcours le côté gauche
-    while ( hb->he_e != NULL && (hb != h || cpt == 0 ) ) {
-        hb = hb->he_e->getPrevious();
-        neighbours.push_back(hb->getOrigin());
-        cpt++;
-    }
+	
+	//je récupère les aretes qui sont sur les bordures
+	Halfedge * h = this->he;
+	Halfedge * hb = h;
+	
+	//neighbours.push_back(hb->getOrigin());
+	int cpt=0;
+	
+	//je parcours le côté gauche
+	while ( hb->he_e != NULL && (hb != h || cpt == 0 ) )
+	{
+		hb = hb->he_e->getPrevious();
+		neighbours.push_back(hb->getOrigin());
+		cpt++;
+	}
 
-    //si j'ai fait le tour de tous les voisins
-    if ( hb == h ) {
-        return neighbours;
-    }
-    //sinon
-    else {
-        hb = h->he_n;
-        neighbours.push_back(hb->v);
-        //je parcours le côté droit
-        while ( hb->he_e != NULL && hb != h->he_n ) {
-            hb = hb->he_e->he_n;
-            neighbours.push_back(hb->v);
-        }
+	//si j'ai fait le tour de tous les voisins
+	if ( hb == h ) return neighbours;
 
-        return neighbours;
-    }
+	//sinon
+	else
+	{
+		hb = h->he_n;
+		neighbours.push_back(hb->v);
+		
+		//je parcours le côté droit
+		while ( hb->he_e != NULL && hb != h->he_n )
+		{
+			hb = hb->he_e->he_n;
+			neighbours.push_back(hb->v);
+		}
+
+		return neighbours;
+	}
 
 }
 
