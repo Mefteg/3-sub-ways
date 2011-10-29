@@ -10,14 +10,10 @@ Face::Face(Halfedge * h ) {
 
 vector<Halfedge *> Face::getHalfedges() {
     vector<Halfedge *> v_H = vector<Halfedge *>();
-    //je stocke la premiere arete
     v_H.push_back(this->he);
-    //et je passe à la secp,de
     Halfedge * h = this->he->he_n;
-    //tant que je suis pas revenu sur la premiere arete
     while ( h != this->he ) {
         v_H.push_back(h);
-        //je passe à l'arete suivante
         h = h->he_n;
     }
 

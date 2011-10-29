@@ -49,7 +49,6 @@ void Halfedge::maillageToHalfedge( Vertex ** t_Maillage, int nb_pas, vector<Half
     for ( int i=0; i<nb_pas-2; i++ ) {
         Halfedge * he_1b = NULL;
         for ( int j=0; j<nb_pas-2; j++ ) {
-            //face 1
             v_Halfedge->push_back(new Halfedge(t_Maillage[i*nb_pas+j]));
             Halfedge * he_1 = v_Halfedge->at(v_Halfedge->size()-1);
             t_Maillage[i*nb_pas +j]->he = he_1;
@@ -72,7 +71,6 @@ void Halfedge::maillageToHalfedge( Vertex ** t_Maillage, int nb_pas, vector<Half
             he_2->f = f1;
             he_3->f = f1;
 
-            //Aretes paires
             if ( j > 0 ) {
                 he_1->he_e = he_1b;
                 he_1b->he_e = he_1;
@@ -82,7 +80,6 @@ void Halfedge::maillageToHalfedge( Vertex ** t_Maillage, int nb_pas, vector<Half
                 t_He2_b[j]->he_e = he_2;
             }
 
-            //face 2
             v_Halfedge->push_back(new Halfedge(t_Maillage[(i+1)*nb_pas+j+1]));
             he_1b = v_Halfedge->at(v_Halfedge->size()-1);
             t_Maillage[(i+1)*nb_pas+j+1]->he = he_1b;
@@ -105,7 +102,6 @@ void Halfedge::maillageToHalfedge( Vertex ** t_Maillage, int nb_pas, vector<Half
             he_2b->f = f2;
             he_3b->f = f2;
 
-            //Aretes paires
             he_3->he_e = he_3b;
             he_3b->he_e = he_3;
 
@@ -116,22 +112,17 @@ void Halfedge::maillageToHalfedge( Vertex ** t_Maillage, int nb_pas, vector<Half
 }
 
 void Halfedge::computeNormals(Vertex ** t_Maillage, int nb_pas, vector<Face *> * v_Face) {
-    //pour chaque face
     for ( int i=0; i<v_Face->size(); i++ ) {
         gk::Vector norm = v_Face->at(i)->computeNormal();
         vector<Vertex *> v_V = v_Face->at(i)->getVertex();
-        //pour chaque vertex de cette face
         for ( int j=0; j<v_V.size(); j++ ) {
-            //je lui ajoute la normale de la face
             v_V.at(j)->n += gk::Normalize(norm);
         }
     }
 }
 
 void evenHalfedge( Vertex * a, Vertex * b, Halfedge * he1, Halfedge * he2 ) {
-    //si a et b ont deja une arete associée
     if ( a->he != he1 && b->he != he2 ) {
-        //si ils forment deja une arete
         if ( a->he->he_n->v == b ) {
             he2->he_e = b->he;
         }

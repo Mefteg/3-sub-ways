@@ -70,7 +70,6 @@ bool Vertex::isOnBorder() {
         cpt++;
     }
 
-    //si on a fait le tour des aretes poitant vers le vertex
     if ( hb == h && cpt > 0 ) {
         return false;
     }
@@ -79,65 +78,15 @@ bool Vertex::isOnBorder() {
     }
 }
 
-/*
 std::vector<Vertex*> Vertex::getNeighbours()
 {
 	vector<Vertex*> neighbours = vector<Vertex*>();
-	Halfedge* temp = this->he->he_n;
 
-	// Sens horaire
-	for(;;)
-	{
-		if(temp->v->isIn(neighbours))
-		{
-			cout << "\t\tOn part via sens horaire !\n";
-			return neighbours;
-		}
-
-		neighbours.push_back(temp->v);
-		
-		cout << "Sens horaire\n";
-
-		if(temp->he_e) temp = temp->he_e->he_n;
-		else break;
-	}
-	cout << "On sort du sens horaire !\n";
-
-	if(this->he->he_e) temp = this->he->he_e;
-	else
-	{
-		cout << "\t\tOn part via sens trigonométrique !\n";
-		return neighbours;
-	}
-
-	// Sens trigonométrique
-	for(;;)
-	{
-		neighbours.push_back(temp->v);
-		
-		cout << "Sens trigonométrique\n";
-		
-		if(temp->getPrevious()->he_e) temp = temp->getPrevious()->he_e;
-		else break;
-	}
-	cout << "On sort du sens trigonométrique !\n";
-
-	return neighbours;
-}
-*/
-
-std::vector<Vertex*> Vertex::getNeighbours()
-{
-	vector<Vertex*> neighbours = vector<Vertex*>();
-	
-	//je récupère les aretes qui sont sur les bordures
 	Halfedge * h = this->he;
 	Halfedge * hb = h;
-	
-	//neighbours.push_back(hb->getOrigin());
+
 	int cpt=0;
-	
-	//je parcours le côté gauche
+
 	while ( hb->he_e != NULL && (hb != h || cpt == 0 ) )
 	{
 		hb = hb->he_e->getPrevious();
@@ -145,16 +94,13 @@ std::vector<Vertex*> Vertex::getNeighbours()
 		cpt++;
 	}
 
-	//si j'ai fait le tour de tous les voisins
 	if ( hb == h ) return neighbours;
 
-	//sinon
 	else
 	{
 		hb = h->he_n;
 		neighbours.push_back(hb->v);
-		
-		//je parcours le côté droit
+
 		while ( hb->he_e != NULL && hb != h->he_n )
 		{
 			hb = hb->he_e->he_n;
